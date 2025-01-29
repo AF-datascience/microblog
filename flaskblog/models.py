@@ -1,7 +1,8 @@
 # class models are the database 
 # each class is a table in the database 
 from datetime import datetime
-from flaskblog import db
+from flaskblog import db, login_manager
+from flask_login import UserMixin
 
 # class or model for the users 
 # class Users(db.Model): 
@@ -44,8 +45,20 @@ from flaskblog import db
 
 # the post attribute is not a column it is a query grabbic the posts from teh user
 
+# create function that loads a user based on the id 
+# so we are adding functionality to the database models and the 
+# login manager will handle the sessions for us 
+# this is a decorated functio nto reloading the user_id from the session 
+# so flask-login needs to find user by id 
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id): 
+    return User.query.get(int(user_id))
+
+
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)

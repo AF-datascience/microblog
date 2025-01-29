@@ -6,6 +6,8 @@
 # import flask class
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy 
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 # app is an instance of flask viarable 
 # __name__ is the name of the module, this is the same as main - so flask knows where to look
 app = Flask(__name__)
@@ -26,7 +28,16 @@ db = SQLAlchemy(app)
 # db.create_all()
 # test with User.query.all()
 
+# adding in encryption hasing for user password 
+bcrypt = Bcrypt(app)
 
+# Adding a login manager so that we can handle user logins 
+login_manager = LoginManager(app)
+
+# where the login will work: 
+# samne as url_for 
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
 
 # import the routes 
 from flaskblog import routes
