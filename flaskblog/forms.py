@@ -111,7 +111,7 @@ class UpdateAccountForm(FlaskForm):
             if user: 
                 raise ValidationError('That email has been taken')
             
-# A new class form to createa  psot : 
+# A new class form to create a  psot : 
 class PostForm(FlaskForm): 
     # validator as every title needs to exist
     title = StringField('Title', validators=[DataRequired()])

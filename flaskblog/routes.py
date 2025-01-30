@@ -1,7 +1,7 @@
 import os 
 import secrets
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog import app, db, bcrypt
 from flaskblog.models import User, Post
@@ -223,7 +223,84 @@ def new_post():
         return redirect(url_for('home'))
 
     # passing in the form into the html template
-    return render_template("create_post.html", title = "New Post", form = form)
+    return render_template("create_post.html", title = "New Post", 
+                           form = form, 
+                           legend = "New Post")
+
+# now creating a way to delete the posts we make 
+# this would be to update and delete posts 
+
+## a route will take you to a specific page and post: 
+### flask lets you add variables within a route
+# so if the id of a route is part of the route we make this function: 
+# the varuable is post_id and is then passed into the Post.query commanmd 
+# hence we can extract the id
+# so each post will hae a url like localhost:5000/post_1
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    # we fetch the post 
+    post = Post.query.get_or_404(post_id)
+    # render template for the returned post 
+    return render_template('post.html', title = post.title, post = post)
+     
+
+# a new route to delete a post 
+# this will be a new form to update the post
+# a suer must be logged in to update a post: 
+@login_required
+@app.route("/post/<int:post_id>/update",methods= ['GET', 'POST'])
+def update_post(post_id):
 
 
+    # we fetch the post 
+    post = Post.query.get_or_404(post_id)
+    # only a posts author can amend their own post: 
+    # conditional check to make sure they are who they are: 
+    # using backref of author
+    if post.author != current_user: 
+        abort(403)
+    
+    # create form to post a new form: 
+    form = PostForm()
 
+    # check validation: 
+    if form.validate_on_submit(): 
+        post.title = form.title.data 
+        post.content = form.content.data
+        # comitt changes but do not need to add these as theses are already there 
+        db.session.commit()
+        # flash messahge to screen 
+        flash('Your Post has been updated!', 'success')
+        return redirect(url_for('post', post_id = post.id))
+    # this populates the fields as its a get request
+    elif request.method == "GET": 
+        form.title.data = post.title 
+        form.content.data = post.content
+
+
+    # render template for the returned post 
+    return render_template('create_post.html', title = 'Update Post', 
+                           form = form, legend = "Update Post")
+     
+
+
+# A route to delete a post: 
+@login_required
+@app.route("/post/<int:post_id>/delete",methods= [ 'POST'])
+def delete_post(post_id):
+
+
+    # we fetch the post 
+    post = Post.query.get_or_404(post_id)
+    # only a posts author can amend their own post: 
+    # conditional check to make sure they are who they are: 
+    # using backref of author
+    if post.author != current_user: 
+        abort(403)
+    # delete the post from teh db 
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your post has been deleted!', 'success')
+    # return to home page: 
+    return redirect(url_for('home'))
+    
