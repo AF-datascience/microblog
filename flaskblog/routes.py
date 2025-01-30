@@ -1,8 +1,10 @@
+import secrets
 from flask import render_template, url_for, flash, redirect, request
-from flaskblog.forms import RegistrationForm, LoginForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flaskblog import app, db, bcrypt
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
+
 
 
 # dummy data: 
@@ -73,12 +75,14 @@ def register():
         db.session.commit()
         flash('Your account has been created! You can now Login', 'success')
         return redirect(url_for('login'))
+    
+    # else if there is no user form submitted its just the register page
     return render_template('register.html', title = "Register", form =form)
 
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    # if the user is already loggined in: 
+    # if the user is already logged in: 
     if current_user.is_authenticated: 
         # go to the home page: 
         return redirect(url_for('home'))
@@ -112,11 +116,49 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+# save picture: 
+def save_picture(form_picture): 
+    # saves the users picture, but not the filename: 
+
+
+
+
 # adding a route for account 
 # when a user is loggined in they will see this route: 
 # login required decoretor so you can access when logged in 
 # you have to tell the extension where the login route is located
-@app.route("/account")
+@app.route("/account", methods = ['GET', 'POST'])
 @login_required
 def account(): 
-    return render_template('account.html', title = 'Account')
+    # create instance of the updating account information form: 
+    form = UpdateAccountForm()
+
+    if form.validate_on_submit(): 
+            # if the form uis valid we can update our curren tusername and email and photo
+            # can change values from current user varaibles
+            # changing current user values for username and email from the form 
+
+        # checl that a picture exists: 
+        
+        current_user.username = form.username.data
+        current_user.email = form.email.data 
+        # commit to the database
+        db.session.commit()
+        # add user image: 
+        flash('Your Account has been Updated!', 'success')
+        # This avoids reloading POST requests constantly 
+        return redirect(url_for('account'))
+    # else conditional to check if its a get request 
+    # so we can populate the fields with current user information
+    elif request.method == 'GET': 
+        form.username.data = current_user.username 
+        form.email.data = current_user.email
+
+
+
+
+    # setting the image file to be sent to acccount template
+    # this will take teh image_file used when making the account
+    # we have default image that is used
+    image_file = url_for('static', filename = 'profile_pics/' + current_user.image_file)
+    return render_template('account.html', title = 'Account', image_file = image_file, form = form)
