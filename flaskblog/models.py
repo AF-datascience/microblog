@@ -56,6 +56,8 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# posts has author as a backreference
+# this means that we can access the users posts via the author
 
 
 class User(db.Model, UserMixin):

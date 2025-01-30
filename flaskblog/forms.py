@@ -6,7 +6,7 @@ from flask_wtf import FlaskForm
 # import file upload 
 from flask_wtf.file import FileField, FileAllowed
 # these are fiels that we import from the wt froms package
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 #t hese are validators they help set some conditions on the form inputs
 # some are lenghts and valid emails others are just values equal to
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
@@ -110,3 +110,13 @@ class UpdateAccountForm(FlaskForm):
 
             if user: 
                 raise ValidationError('That email has been taken')
+            
+# A new class form to createa  psot : 
+class PostForm(FlaskForm): 
+    # validator as every title needs to exist
+    title = StringField('Title', validators=[DataRequired()])
+    # text area field is needed for the post 
+    # every post needs content
+    content = TextAreaField('Content', validators=[DataRequired()])
+    # submit the field: 
+    submit = SubmitField('Post')

@@ -1,6 +1,8 @@
+import os 
 import secrets
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog import app, db, bcrypt
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
@@ -9,22 +11,22 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 # dummy data: 
 # can be used int he template for home.html using jinja 
-posts = [
+# posts = [
 
-    {'title': 'Bond Market',
-     'author': 'john Doe', 
-     'content': 'HSBC' , 
-     'date_posted': '01-01-2024'
-     }, 
+#     {'title': 'Bond Market',
+#      'author': 'john Doe', 
+#      'content': 'HSBC' , 
+#      'date_posted': '01-01-2024'
+#      }, 
 
-    {'title': 'Gilts Market',
-     'author': 'John Smith', 
-     'content': 'JP Morgan', 
-     'date_posted': '01-01-2024'
-     } 
+#     {'title': 'Gilts Market',
+#      'author': 'John Smith', 
+#      'content': 'JP Morgan', 
+#      'date_posted': '01-01-2024'
+#      } 
 
 
-]
+# ]
 
 
 
@@ -39,6 +41,10 @@ posts = [
 @app.route("/home")
 # render the template from the templates directory
 def home(): 
+    # this conde renderes the dummy data into the html file
+    # return render_template('home.html', posts = posts)
+    # a new posts ariaable is equialent from our posts 
+    posts = Post.query.all()
     return render_template('home.html', posts = posts)
 
 # about page route: 
@@ -119,8 +125,27 @@ def logout():
 # save picture: 
 def save_picture(form_picture): 
     # saves the users picture, but not the filename: 
+    # hex makes a random filename for the item 
+    random_hex = secrets.token_hex(8)
+    # splits out the filename into two objects, we wont use the first 
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    # get full path where the image will be saved 
+    # using root path atrtribute of the app 
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    # resize image: 
+    output_size = (125,125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
 
 
+    # save the image to the filestystem 
+    # this does not update the database
+    i.save(picture_path)
+
+    # return picture filename: 
+    return picture_fn
 
 
 # adding a route for account 
@@ -138,6 +163,11 @@ def account():
             # can change values from current user varaibles
             # changing current user values for username and email from the form 
 
+            # adding another conditional to see if there is any picture data: 
+        if form.picture.data: 
+                # set the users profile picture 
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
         # checl that a picture exists: 
         
         current_user.username = form.username.data
@@ -162,3 +192,38 @@ def account():
     # we have default image that is used
     image_file = url_for('static', filename = 'profile_pics/' + current_user.image_file)
     return render_template('account.html', title = 'Account', image_file = image_file, form = form)
+
+
+# New route for a user to create a new post: 
+@app.route("/post/new", methods = ['GET', 'POST'])
+# need a login required decorator as user needs to be logged in 
+@login_required
+def new_post(): 
+    # create instance of the form
+    form = PostForm()
+    # this validates the form when it is sent via POST request 
+    # flashes a message to the screen 
+    # then redirects to the home page
+    if form.validate_on_submit(): 
+
+        # adding the post to the database: 
+        # here we are using the class model that we made earlier and passing in its values 
+        # here we are using backref as author, but you dont need to and can use user_id
+        post = Post(title = form.title.data, 
+                    content = form.content.data, 
+                    author = current_user
+                    )
+        
+        # add values: 
+        db.session.add(post)
+        # commit to db 
+        db.session.commit()
+
+        flash("Your Post has been created!", 'success')
+        return redirect(url_for('home'))
+
+    # passing in the form into the html template
+    return render_template("create_post.html", title = "New Post", form = form)
+
+
+
