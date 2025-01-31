@@ -247,6 +247,7 @@ def post(post_id):
 # a new route to delete a post 
 # this will be a new form to update the post
 # a suer must be logged in to update a post: 
+# variables within a route lets you go to specific pages
 @login_required
 @app.route("/post/<int:post_id>/update",methods= ['GET', 'POST'])
 def update_post(post_id):
