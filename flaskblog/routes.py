@@ -44,7 +44,21 @@ def home():
     # this conde renderes the dummy data into the html file
     # return render_template('home.html', posts = posts)
     # a new posts ariaable is equialent from our posts 
-    posts = Post.query.all()
+    # paginate this home page so that we can have a set number of posts per page
+
+    # for specific pages: 
+    # sets default page as 1 
+    # grabs a page we want
+    # so someone has to pass a page number a s number
+    # we pass thios page into the query below
+    # its like when you pass in ?page = int in the url bar
+    page = request.args.get('page', 1, type = int)
+
+    # paginate method will be set so we can see 5 posts per pages: 
+    # need to make a way so that the we can see the other pages in the posts home route: 
+
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page = page, per_page = 2)
+    # posts = Post.query.all()
     return render_template('home.html', posts = posts)
 
 # about page route: 
@@ -305,3 +319,35 @@ def delete_post(post_id):
     # return to home page: 
     return redirect(url_for('home'))
     
+
+# making a new route so that when you click on a users name it takes you to a page 
+# with just their posts: 
+@app.route("/user/<string:username>")
+# render the template from the templates directory
+def user_posts(username): 
+    # this conde renderes the dummy data into the html file
+    # return render_template('home.html', posts = posts)
+    # a new posts ariaable is equialent from our posts 
+    # paginate this home page so that we can have a set number of posts per page
+
+    # for specific pages: 
+    # sets default page as 1 
+    # grabs a page we want
+    # so someone has to pass a page number a s number
+    # we pass thios page into the query below
+    # its like when you pass in ?page = int in the url bar
+    page = request.args.get('page', 1, type = int)
+
+    # getting info for the users posts only: 
+    user = User.query.filter_by(username = username).first_or_404()
+
+    # paginate method will be set so we can see 5 posts per pages: 
+    # need to make a way so that the we can see the other pages in the posts home route: 
+    # filters the posts for the user
+    posts = Post.query.filter_by(author = user)\
+        .order_by(Post.date_posted.desc())\
+        .paginate(page = page, per_page = 2)
+    # posts = Post.query.all()
+    # we are also rendering a new user posts page on html 
+    # this is where we see posts only from that user! 
+    return render_template('user_posts.html', posts = posts, user = user)

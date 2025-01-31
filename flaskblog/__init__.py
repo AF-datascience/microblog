@@ -23,7 +23,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///site.db"
 db = SQLAlchemy(app)
 # you create the instance of the database 
 # load into python and from flaskblog import db 
-# then import models, flaskblog.models import User, Post 
+# then import models, flaskblog.models import User, Post, 
+# from flaskblog import app
 # app.app_context().push()
 # db.create_all()
 # test with User.query.all()
