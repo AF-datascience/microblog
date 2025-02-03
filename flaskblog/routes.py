@@ -330,7 +330,7 @@ def user_posts(username):
     # a new posts ariaable is equialent from our posts 
     # paginate this home page so that we can have a set number of posts per page
 
-    # for specific pages: 
+    # for specific pages:  
     # sets default page as 1 
     # grabs a page we want
     # so someone has to pass a page number a s number
