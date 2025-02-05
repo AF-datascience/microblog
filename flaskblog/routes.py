@@ -337,7 +337,7 @@ def user_posts(username):
     # we pass thios page into the query below
     # its like when you pass in ?page = int in the url bar
     page = request.args.get('page', 1, type = int)
-
+ 
     # getting info for the users posts only: 
     user = User.query.filter_by(username = username).first_or_404()
 
