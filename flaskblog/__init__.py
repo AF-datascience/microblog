@@ -4,10 +4,12 @@
 # initialise the application
 
 # import flask class
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy 
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_mail import Mail # helps us send emails
 # app is an instance of flask viarable 
 # __name__ is the name of the module, this is the same as main - so flask knows where to look
 app = Flask(__name__)
@@ -39,6 +41,17 @@ login_manager = LoginManager(app)
 # samne as url_for 
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
+
+# making confirm variables for the mail: 
+# thi si show the app knows how to send emails 
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+# use the environment variables for email account:
+# these are going to be set to my username and password
+#  we set them in environment variables for sercurity purposes
+ 
+
 
 # import the routes 
 from flaskblog import routes

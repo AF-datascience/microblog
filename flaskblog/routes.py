@@ -353,6 +353,14 @@ def user_posts(username):
     return render_template('user_posts.html', posts = posts, user = user)
 
 
+# define function to send a reset email to a user 
+def send_reset_email(user): 
+    pass
+
+
+
+
+
 # create new routes for requesting email so that 
 # reset password information will be sent
 # this just handles where they enter their email and information is sent to them 
@@ -369,7 +377,46 @@ def reset_request():
 
     # create the form 
     form = RequestResetForm()
+
+    # handle if form was validated on submit 
+    # so they have submitted an email 
+    if form.validate_on_submit(): 
+        user = User.query.filter_by(email = form.email.data).first()
+        # after we have user we want to send an email with this token 
+        send_reset_email(user)
+        flash("An email has been sent with instructions", 'info')
+        return redirect(url_for('login'))
     # render template: 
     return render_template('reset_request.html', title = "Reset Password", 
                            form = form)
     
+
+# create a route where the user reesets their password
+# we can check the token is part of the user 
+# so it checks they are the same person 
+# this is where they reset the password with the token active
+@app.route("/reset_password/<token>", methods = ['GET', 'POST'])
+def reset_token(token): 
+    # we want user to be logoutted to get to this page
+        # if the user is already logged in: 
+        # which means they will always be in the home 
+        # if they are logged in
+    if current_user.is_authenticated: 
+        # go to the home page: 
+        return redirect(url_for('home')) 
+    # check with token code: 
+    # this token is passed via the url 
+    # it takes a token, if the token is valid it return 
+    # the user with that user id 
+    # user id is the payload into the initial token 
+    # if there is no token, then its invalid or expired
+    user = User.verify_reset_token(token)
+
+    # check if valid 
+    if user is None: 
+        flash ("That is an invalid or expired Token", 'warning')
+        return redirect(url_for('reset_request'))
+    # so we can now place the form as its valid: 
+    form = ResetPasswordForm() 
+    # render template to rset password
+    return render_template('reset_token.html', title = 'Reset Passowrd', form = form)
