@@ -4,7 +4,7 @@ from datetime import datetime
 from flaskblog import db, login_manager, app
 # this is for users emails and passwords to genrerate a secure time sensitve token 
 # so that only someone with access to the users email can reset their password
-from itsdangerous import URLSafeTimedSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer
 from flask_login import UserMixin
 
 # class or model for the users 
@@ -74,7 +74,7 @@ class User(db.Model, UserMixin):
     # creating methods that make it easier to generate tokens used for resetting emails and passwords
     def get_reset_token(self): 
         # create serializers
-        s = Serializer(app.config['SECRET KEY'])
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
         # return a token with this serailizer 
         # this is the payload
         return s.dumps({'user_id': self.id})
@@ -88,16 +88,14 @@ class User(db.Model, UserMixin):
     # does not use self method - is static method
     # do not expect self as an argument
     @staticmethod
-    def verify_reset_token(token): 
-        s = Serializer(app.config['SECRET KEY'])
-        try: 
-            user_id = s.loads(token)['user_id']
-        except:     
+    def verify_reset_token(token, expires_sec=1800):
+        s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token,max_age = expires_sec)['user_id']
+        except:
             return None
-        
-        # reutnr user id: 
         return User.query.get(user_id)
-    # create 
+ 
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"

@@ -50,8 +50,11 @@ app.config['MAIL_USE_TLS'] = True
 # use the environment variables for email account:
 # these are going to be set to my username and password
 #  we set them in environment variables for sercurity purposes
- 
-
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
+# password for email: 
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+# we can no wintiailize exteision
+mail = Mail(app)
 
 # import the routes 
 from flaskblog import routes
