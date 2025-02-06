@@ -126,3 +126,36 @@ class PostForm(FlaskForm):
     # form to reset the password page 
     # submit their email for their account
     # where the instructions for reseting password will be sent 
+
+class RequestResetForm(FlaskForm): 
+
+    email = StringField('Email', 
+                        validators=[DataRequired(), Email()])
+    # we have to check that a email exists 
+    # otherwise they have to create an email address
+    submit = SubmitField('Request Password Reset')
+
+    # check if the email does not exist: 
+    # check if an account exists for this email 
+    # which means they did not create an account - like on resgistaration
+        # check that the email is unique too: 
+        # we want to check if the email does not exists
+    def validate_email(self, email): 
+
+        # grabs email data: 
+        user = User.query.filter_by(email = email.data).first() 
+
+        if user is None: 
+            raise ValidationError('There is no account associated with this Email. You must register First!')
+        
+# class to rest the password: 
+class ResetPasswordForm(FlaskForm): 
+    # two fields to confirm passwords and submit: 
+    password = PasswordField('Password', validators=[DataRequired()])
+
+    confirm_password = PasswordField('Confirm Password', 
+                                     validators=[DataRequired(), 
+                                                 EqualTo('password')])
+    
+    submit = SubmitField('Reset Password')
+    # create routes and templates that handles forms

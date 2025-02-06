@@ -2,7 +2,7 @@ import os
 import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, RequestResetForm, ResetPasswordForm
 from flaskblog import app, db, bcrypt
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
@@ -351,3 +351,25 @@ def user_posts(username):
     # we are also rendering a new user posts page on html 
     # this is where we see posts only from that user! 
     return render_template('user_posts.html', posts = posts, user = user)
+
+
+# create new routes for requesting email so that 
+# reset password information will be sent
+# this just handles where they enter their email and information is sent to them 
+# to change the actual password
+@app.route("/reset_password", methods = ['GET', 'POST'])
+def reset_request(): 
+    # we want user to be logoutted to get to this page
+        # if the user is already logged in: 
+        # which means they will always be in the home 
+        # if they are logged in
+    if current_user.is_authenticated: 
+        # go to the home page: 
+        return redirect(url_for('home')) 
+
+    # create the form 
+    form = RequestResetForm()
+    # render template: 
+    return render_template('reset_request.html', title = "Reset Password", 
+                           form = form)
+    
