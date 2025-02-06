@@ -1,7 +1,10 @@
 # class models are the database 
 # each class is a table in the database 
 from datetime import datetime
-from flaskblog import db, login_manager
+from flaskblog import db, login_manager, app
+# this is for users emails and passwords to genrerate a secure time sensitve token 
+# so that only someone with access to the users email can reset their password
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_login import UserMixin
 
 # class or model for the users 
@@ -67,6 +70,34 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     posts = db.relationship('Post', backref='author', lazy=True)
+
+    # creating methods that make it easier to generate tokens used for resetting emails and passwords
+    def get_reset_token(self): 
+        # create serializers
+        s = Serializer(app.config['SECRET KEY'])
+        # return a token with this serailizer 
+        # this is the payload
+        return s.dumps({'user_id': self.id})
+    
+    # methd to verify a token 
+    # takes a token as argument 
+    # creates a serializer 
+    # loads a token 
+    # with exception returns none 
+    # else returns a users id 
+    # does not use self method - is static method
+    # do not expect self as an argument
+    @staticmethod
+    def verify_reset_token(token): 
+        s = Serializer(app.config['SECRET KEY'])
+        try: 
+            user_id = s.loads(token)['user_id']
+        except:     
+            return None
+        
+        # reutnr user id: 
+        return User.query.get(user_id)
+    # create 
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"

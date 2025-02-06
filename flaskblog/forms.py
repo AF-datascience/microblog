@@ -120,3 +120,9 @@ class PostForm(FlaskForm):
     content = TextAreaField('Content', validators=[DataRequired()])
     # submit the field: 
     submit = SubmitField('Post')
+
+    # create some new forms to rset a email and a password
+
+    # form to reset the password page 
+    # submit their email for their account
+    # where the instructions for reseting password will be sent 
