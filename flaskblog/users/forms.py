@@ -1,19 +1,12 @@
-# creating forms and validate user inputs 
-# using flask-wtf package to create forms
-# python classes represent the forms, and html converts in the termplate
-from flask_wtf import FlaskForm
-
-# import file upload 
-from flask_wtf.file import FileField, FileAllowed
-# these are fiels that we import from the wt froms package
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
-#t hese are validators they help set some conditions on the form inputs
-# some are lenghts and valid emails others are just values equal to
+# moving all forms that are for a user and autherntication
+# as we are making a blueprint 
+from flask_wtf import FlaskForm 
+from flask_wtf.file import FileField, FileAllowed 
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from flask_login import current_user 
 from flaskblog.models import User
 
-# flask login import current user this will handle updating user account information
-from flask_login import current_user
 
 
 # python class to represent a registration form 
@@ -111,21 +104,12 @@ class UpdateAccountForm(FlaskForm):
             if user: 
                 raise ValidationError('That email has been taken')
             
-# A new class form to create a  psot : 
-class PostForm(FlaskForm): 
-    # validator as every title needs to exist
-    title = StringField('Title', validators=[DataRequired()])
-    # text area field is needed for the post 
-    # every post needs content
-    content = TextAreaField('Content', validators=[DataRequired()])
-    # submit the field: 
-    submit = SubmitField('Post')
 
-    # create some new forms to rset a email and a password
 
-    # form to reset the password page 
-    # submit their email for their account
-    # where the instructions for reseting password will be sent 
+# create some new forms to rset a email and a password
+# form to reset the password page 
+# submit their email for their account
+# where the instructions for reseting password will be sent 
 
 class RequestResetForm(FlaskForm): 
 

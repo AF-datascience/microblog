@@ -56,5 +56,12 @@ app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
 # we can no wintiailize exteision
 mail = Mail(app)
 
-# import the routes 
-from flaskblog import routes
+# import the routes - improt the bluepirnt objects
+from flaskblog.users.routes import users # this is the blueprint instance
+from flaskblog.posts.routes import posts 
+from flaskblog.main.routes import main 
+# register the blueprint
+app.register_blueprint(users)
+app.register_blueprint(posts)
+app.register_blueprint(main)
+# from flaskblog import routes
