@@ -112,14 +112,19 @@ def create_app(config_class = Config):
     bcrypt.init_app(app) 
     login_manager.init_app(app)
     mail.init_app(app)
-
-    from flaskblog.users.routes import users # this is the blueprint instance
+    # this is the blueprint instance
+    from flaskblog.users.routes import users 
     from flaskblog.posts.routes import posts 
     from flaskblog.main.routes import main
+    # import the blueprint to handle errors
+    from flaskblog.errors.handlers import errors
 
     app.register_blueprint(users)
     app.register_blueprint(posts)
     app.register_blueprint(main)
+
+    # register the errors blueprin t
+    app.register_blueprint(errors)
 
     return app 
 
