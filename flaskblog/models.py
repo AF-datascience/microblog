@@ -1,7 +1,8 @@
 # class models are the database 
 # each class is a table in the database 
 from datetime import datetime
-from flaskblog import db, login_manager, app
+from flaskblog import db, login_manager
+from flask import current_app
 # this is for users emails and passwords to genrerate a secure time sensitve token 
 # so that only someone with access to the users email can reset their password
 from itsdangerous import URLSafeTimedSerializer
@@ -74,7 +75,7 @@ class User(db.Model, UserMixin):
     # creating methods that make it easier to generate tokens used for resetting emails and passwords
     def get_reset_token(self): 
         # create serializers
-        s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         # return a token with this serailizer 
         # this is the payload
         return s.dumps({'user_id': self.id})
@@ -89,7 +90,7 @@ class User(db.Model, UserMixin):
     # do not expect self as an argument
     @staticmethod
     def verify_reset_token(token, expires_sec=1800):
-        s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token,max_age = expires_sec)['user_id']
         except:

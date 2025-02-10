@@ -27,7 +27,7 @@ def register():
     # if the user is already loggined in: 
     if current_user.is_authenticated: 
         # go to the home page: 
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
 
 
     form = RegistrationForm()
@@ -44,7 +44,7 @@ def register():
         # commit change to database 
         db.session.commit()
         flash('Your account has been created! You can now Login', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('users.login'))
     
     # else if there is no user form submitted its just the register page
     return render_template('register.html', title = "Register", form =form)
@@ -55,7 +55,7 @@ def login():
     # if the user is already logged in: 
     if current_user.is_authenticated: 
         # go to the home page: 
-        return redirect(url_for('home'))
+        return redirect(url_for('main.home'))
 
 
 
@@ -72,7 +72,7 @@ def login():
             next_page = request.args.get('next')
 
 
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
 
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')
@@ -84,7 +84,7 @@ def login():
 @users.route("/logout")
 def logout(): 
     logout_user()
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
 # adding a route for account 
 # when a user is loggined in they will see this route: 
@@ -115,7 +115,7 @@ def account():
         # add user image: 
         flash('Your Account has been Updated!', 'success')
         # This avoids reloading POST requests constantly 
-        return redirect(url_for('account'))
+        return redirect(url_for('users.account'))
     # else conditional to check if its a get request 
     # so we can populate the fields with current user information
     elif request.method == 'GET': 
@@ -178,7 +178,7 @@ def reset_request():
         # if they are logged in
     if current_user.is_authenticated: 
         # go to the home page: 
-        return redirect(url_for('home')) 
+        return redirect(url_for('main.home')) 
 
     # create the form 
     form = RequestResetForm()
@@ -190,7 +190,7 @@ def reset_request():
         # after we have user we want to send an email with this token 
         send_reset_email(user)
         flash("An email has been sent with instructions", 'info')
-        return redirect(url_for('login'))
+        return redirect(url_for('users.login'))
     # render template: 
     return render_template('reset_request.html', title = "Reset Password", 
                            form = form)
@@ -208,7 +208,7 @@ def reset_token(token):
         # if they are logged in
     if current_user.is_authenticated: 
         # go to the home page: 
-        return redirect(url_for('home')) 
+        return redirect(url_for('main.home')) 
     # check with token code: 
     # this token is passed via the url 
     # it takes a token, if the token is valid it return 
@@ -220,7 +220,7 @@ def reset_token(token):
     # check if valid 
     if user is None: 
         flash ("That is an invalid or expired Token", 'warning')
-        return redirect(url_for('reset_request'))
+        return redirect(url_for('users.reset_request'))
     # so we can now place the form as its valid: 
     form = ResetPasswordForm() 
     # render template to rset password
@@ -232,7 +232,7 @@ def reset_token(token):
         # commit change to database 
         db.session.commit()
         flash('Your password has been updated', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('users.login'))
 
     
     return render_template('reset_token.html', title = 'Reset Passowrd', form = form)
